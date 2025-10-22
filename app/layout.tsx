@@ -13,6 +13,11 @@ const poppinsSans = Poppins({
 export const metadata: Metadata = {
 	title: "Olivet Baptist Church",
 	description: "Baptist Church located in Oklahoma",
+	icons: {
+		icon: "/favicon.png",
+		shortcut: "/favicon.png",
+		apple: "/favicon.png",
+	},
 };
 
 export default function RootLayout({
