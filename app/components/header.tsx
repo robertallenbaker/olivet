@@ -11,7 +11,7 @@ export function Header() {
 
 	return (
 		<header>
-			<div className='mx-auto px-8 max-w-[1130px] flex justify-between items-center gap-x-8 pt-[20px] pb-[20px]'>
+			<div className='container flex justify-between items-center gap-x-8 pt-[20px] pb-[20px]'>
 				<div>
 					<Link href={"/"}>
 						<Image
@@ -105,7 +105,7 @@ export function Header() {
 				}`}
 				aria-hidden={!open}
 			>
-				<div className='mx-auto max-w-[1130px] pt-8 flex flex-col gap-8 bg-blue'>
+				<div className='container pt-8 flex flex-col gap-8 bg-blue'>
 					<Link
 						className='text-white'
 						href='/answers'

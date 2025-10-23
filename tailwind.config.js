@@ -6,18 +6,58 @@ module.exports = {
 		"./app/**/*.{js,ts,jsx,tsx,mdx}",
 	],
 	theme: {
+		container: {
+			center: true,
+			padding: "2rem",
+			screens: {
+				DEFAULT: "1130px",
+			},
+		},
 		extend: {
+			fontFamily: {
+				primary: ["Poppins", "sans-serif"],
+			},
 			colors: {
-				red: "#ED2024",
-				yellowGreen: "#8DC63F",
-				lightGreen: "#50BB7D",
-				orange: "#F26722",
-				purple: "#AD4F9E",
-				blue: "#4660AC",
-				lightBlue: "#80ACDC",
-				magenta: "#d81964",
-				grey: "#D9D9D9",
-				darkGrey: "#6B6A6A",
+				red: {
+					DEFAULT: "#ED2024",
+					dark: "#8E1315", // 40% darker
+				},
+				yellowGreen: {
+					DEFAULT: "#8DC63F",
+					dark: "#547726", // 40% darker
+				},
+				lightGreen: {
+					DEFAULT: "#50BB7D",
+					dark: "#307047", // 40% darker
+				},
+				orange: {
+					DEFAULT: "#F26722",
+					dark: "#913E14", // 40% darker
+				},
+				purple: {
+					DEFAULT: "#AD4F9E",
+					dark: "#682F5F", // 40% darker
+				},
+				blue: {
+					DEFAULT: "#4660AC",
+					dark: "#2A3967", // 40% darker
+				},
+				lightBlue: {
+					DEFAULT: "#80ACDC",
+					dark: "#4C6784", // 40% darker
+				},
+				magenta: {
+					DEFAULT: "#d81964",
+					dark: "#820F3C", // 40% darker
+				},
+				grey: {
+					DEFAULT: "#D9D9D9",
+					dark: "#828282", // 40% darker
+				},
+				darkGrey: {
+					DEFAULT: "#6B6A6A",
+					dark: "#404040", // 40% darker
+				},
 			},
 		},
 		// Bootstrap-like breakpoints (min-width)
