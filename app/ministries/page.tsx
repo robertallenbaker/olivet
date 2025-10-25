@@ -5,6 +5,6 @@ export const metadata: Metadata = {
 	description: "The ministries of Olivet Baptist Church",
 };
 
-export default function DiscipleshipPage() {
+export default function MinistriesPage() {
 	return <main>Ministries here</main>;
 }

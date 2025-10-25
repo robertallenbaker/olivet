@@ -1,8 +1,29 @@
 import VideoBackground from "./components/VideoBackground";
 import Link from "next/link";
 import Image from "next/image";
+import { getSermons } from "./lib/graphql/sermons";
 
-export default function Home() {
+function stripHtml(html: string | null | undefined) {
+	if (!html) return "";
+	return html.replace(/<[^>]+>/g, "").trim();
+}
+function formatDate(iso: string | null | undefined) {
+	if (!iso) return "";
+	try {
+		return new Date(iso).toLocaleDateString(undefined, {
+			year: "numeric",
+			month: "long",
+			day: "numeric",
+		});
+	} catch (e) {
+		return iso;
+	}
+}
+
+export default async function Home() {
+	const sermons: any[] = await getSermons();
+	const sermon = sermons && sermons.length > 0 ? sermons[0] : null;
+
 	return (
 		<main className='overflow-x-hidden'>
 			<VideoBackground
@@ -120,15 +141,266 @@ export default function Home() {
 					</div>
 				</div>
 			</section>
-			<section className='this-weeks-sermon'>
-				This week's sermon is going to be brought in dynamically from
-				sermons post type in Wordpress.
+			<section className='this-weeks-sermon py-12'>
+				<div className='container'>
+					<h2 className='text-2xl font-semibold mb-6'>
+						This week's sermon
+					</h2>
+
+					<div className='grid grid-cols-1 gap-6'>
+						{sermon ? (
+							<article
+								key={sermon.id}
+								className='bg-white rounded overflow-hidden shadow'
+							>
+								<div className='p-4'>
+									<h3 className='text-lg font-semibold'>
+										{sermon.title}
+									</h3>
+									{sermon.acfSermonFields?.speaker && (
+										<p className='text-sm text-gray-600'>
+											By {sermon.acfSermonFields.speaker}
+										</p>
+									)}
+
+									{sermon.date && (
+										<p className='text-sm text-gray-500'>
+											{formatDate(sermon.date)}
+										</p>
+									)}
+
+									{sermon.acfSermonFields?.youtube_id && (
+										<div className='mt-4'>
+											<div className='aspect-video w-full overflow-hidden rounded'>
+												<iframe
+													src={`https://www.youtube.com/embed/${sermon.acfSermonFields.youtube_id}?rel=0&showinfo=0`}
+													title={sermon.title}
+													allow='accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture'
+													className='w-full h-full border-0'
+													loading='lazy'
+												/>
+											</div>
+										</div>
+									)}
+
+									{sermon.content && (
+										<p className='mt-3 text-sm text-gray-700'>
+											{stripHtml(sermon.content).slice(
+												0,
+												200
+											)}
+											{stripHtml(sermon.content).length >
+											200
+												? "…"
+												: ""}
+										</p>
+									)}
+								</div>
+							</article>
+						) : (
+							<p>No sermons found.</p>
+						)}
+					</div>
+				</div>
 			</section>
 			<section className='events'>
 				Events is going to be brought in dynamically from events post
 				type in Wordpress.
 			</section>
-			<section className='about-olivet'>About Olivet here</section>
+			<hr className='max-w-[1072px] mx-auto border-[1px] border-solid border-grey' />
+			<section className='about-olivet pt-[128px] pb-[104px]'>
+				<div className='container'>
+					<div className='grid grid-cols-12 gap-16 items-center'>
+						<div className='col-span-12 md:col-span-6 lg:col-span-4'>
+							<h2 className='text-base font-semibold mb-6'>
+								About Olivet
+							</h2>
+							<p>
+								Olivet Baptist Church is a community of
+								believers who believe your questions are
+								important and we want to share the answers we
+								have with those around us. Our mission statement
+								is "Love. Belong. Make. Reach.", and we offer a
+								variety of ministries and events to help people
+								grow in their faith.
+							</p>
+						</div>
+						<div className='col-span-12 md:col-span-6 lg:col-span-8'>
+							<div
+								style={{
+									position: "relative",
+									paddingBottom: "56.25%",
+									height: 0,
+									overflow: "hidden",
+									maxWidth: "100%",
+								}}
+							>
+								<iframe
+									src='https://www.youtube.com/embed/u31qwQUeGuM?controls=1&rel=0'
+									frameBorder='0'
+									allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture'
+									allowFullScreen
+									style={{
+										position: "absolute",
+										top: 0,
+										left: 0,
+										width: "100%",
+										height: "100%",
+									}}
+								></iframe>
+							</div>
+						</div>
+					</div>
+				</div>
+			</section>
+			<section className='ministries bg-grey pt-[104px] pb-[163px]'>
+				<div className='container'>
+					<h2 className='text-[32px] font-semibold text-center'>
+						Ministries
+					</h2>
+				</div>
+			</section>
+			<section className='our-pastors pt-[112px] pb-[154px]'>
+				<div className='container'>
+					<h2 className='text-[32px] font-semibold text-center mb-8'>
+						Our Pastors
+					</h2>
+					<div className='grid grid-cols-12 gap-8'>
+						<div className='col-span-12 md:col-span-6 lg:col-span-3'>
+							<Image
+								src='/scott-palmer-vertical.jpg'
+								alt='Scott Palmer'
+								width={256}
+								height={454}
+							/>
+							<div className='bg-grey p-[20px]'>
+								<h3 className='text-[22px] text-center font-semibold leading-[40px] mb-2'>
+									Scott Palmer
+								</h3>
+								<Link
+									href={"mailto:scott"}
+									className='bg-[#6b6a6a] text-[20px] text-white p-2 font-semibold block text-center transition-all duration-300 ease-in-out hover:bg-black'
+								>
+									Email Scott
+								</Link>
+							</div>
+						</div>
+						<div className='col-span-12 md:col-span-6 lg:col-span-3'>
+							<Image
+								src='/don-cook-vertical.jpg'
+								alt='Don Cook'
+								width={256}
+								height={454}
+							/>
+							<div className='bg-grey p-[20px]'>
+								<h3 className='text-[22px] text-center font-semibold leading-[40px] mb-2'>
+									Don Cook
+								</h3>
+								<Link
+									href={"mailto:scott"}
+									className='bg-[#6b6a6a] text-[20px] text-white p-2 font-semibold block text-center transition-all duration-300 ease-in-out hover:bg-black'
+								>
+									Email Don
+								</Link>
+							</div>
+						</div>
+						<div className='col-span-12 md:col-span-6 lg:col-span-3'>
+							<Image
+								src='/troy-blankenship-vertical.jpg'
+								alt='Troy Blankenship'
+								width={256}
+								height={454}
+							/>
+							<div className='bg-grey p-[20px]'>
+								<h3 className='text-[22px] text-center font-semibold leading-[40px] mb-2'>
+									Troy Blankenship
+								</h3>
+								<Link
+									href={"mailto:troy"}
+									className='bg-[#6b6a6a] text-[20px] text-white p-2 font-semibold block text-center transition-all duration-300 ease-in-out hover:bg-black'
+								>
+									Email Troy
+								</Link>
+							</div>
+						</div>
+						<div className='col-span-12 md:col-span-6 lg:col-span-3'>
+							<Image
+								src='/derek-robinson-vertical.jpg'
+								alt='Scott Palmer'
+								width={256}
+								height={454}
+							/>
+							<div className='bg-grey p-[20px]'>
+								<h3 className='text-[22px] text-center font-semibold leading-[40px] mb-2'>
+									Derek Robinson
+								</h3>
+								<Link
+									href={"mailto:derek"}
+									className='bg-[#6b6a6a] text-[20px] text-white p-2 font-semibold block text-center transition-all duration-300 ease-in-out hover:bg-black'
+								>
+									Email Derek
+								</Link>
+							</div>
+						</div>
+					</div>
+				</div>
+			</section>
+			<section className='olivet-south pt-[160px] pb-[152px] bg-lightBlue'>
+				<div className='container'>
+					<div className='grid grid-cols-12 gap-16 items-center'>
+						<div className='col-span-12 md:col-span-6 lg:col-span-4'>
+							<h2 className='text-base font-semibold mb-6'>
+								Olivet South - Our Brazil Connection
+							</h2>
+							<p>
+								Olivet Baptist Church is a community of
+								believers who believe your questions are
+								important and we want to share the answers we
+								have with those around us. Our mission statement
+								is "Love. Belong. Make. Reach.", and we offer a
+								variety of ministries and events to help people
+								grow in their faith.
+							</p>
+						</div>
+						<div className='col-span-12 md:col-span-6 lg:col-span-8'>
+							<div
+								style={{
+									position: "relative",
+									paddingBottom: "56.25%",
+									height: 0,
+									overflow: "hidden",
+									maxWidth: "100%",
+								}}
+							>
+								<iframe
+									src='https://www.youtube.com/embed/u31qwQUeGuM?controls=1&rel=0'
+									frameBorder='0'
+									allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture'
+									allowFullScreen
+									style={{
+										position: "absolute",
+										top: 0,
+										left: 0,
+										width: "100%",
+										height: "100%",
+									}}
+								></iframe>
+							</div>
+						</div>
+					</div>
+				</div>
+			</section>
+			<section className='testimonial pt-[112px] pb-[91px]'>
+				<div className='container'>
+					<blockquote className='text-center text-[64px] font-extralight leading-[62px] mb-4'>
+						“If I had to describe Olivet in one word, it would be
+						“home.”
+					</blockquote>
+					<cite className='text-center block text-[20px] leading-[40px] not-italic'>
+						– Bob Hunt
+					</cite>
+				</div>
+			</section>
 		</main>
 	);
 }
