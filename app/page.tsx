@@ -2,11 +2,13 @@ import VideoBackground from "./components/VideoBackground";
 import Link from "next/link";
 import Image from "next/image";
 import { getSermons } from "./lib/graphql/sermons";
+import { getEvents } from "./lib/graphql/events";
 
 function stripHtml(html: string | null | undefined) {
 	if (!html) return "";
 	return html.replace(/<[^>]+>/g, "").trim();
 }
+
 function formatDate(iso: string | null | undefined) {
 	if (!iso) return "";
 	try {
@@ -23,6 +25,7 @@ function formatDate(iso: string | null | undefined) {
 export default async function Home() {
 	const sermons: any[] = await getSermons();
 	const sermon = sermons && sermons.length > 0 ? sermons[0] : null;
+	const events: any[] = await getEvents(3);
 
 	return (
 		<main className='overflow-x-hidden'>
@@ -141,39 +144,60 @@ export default async function Home() {
 					</div>
 				</div>
 			</section>
-			<section className='this-weeks-sermon py-12'>
+			<section className='this-weeks-sermon pt-[160px] pb-[152px] bg-lightBlue'>
 				<div className='container'>
-					<h2 className='text-2xl font-semibold mb-6'>
-						This week's sermon
-					</h2>
-
-					<div className='grid grid-cols-1 gap-6'>
-						{sermon ? (
-							<article
-								key={sermon.id}
-								className='bg-white rounded overflow-hidden shadow'
-							>
-								<div className='p-4'>
-									<h3 className='text-lg font-semibold'>
-										{sermon.title}
-									</h3>
-									{sermon.acfSermonFields?.speaker && (
-										<p className='text-sm text-gray-600'>
-											By {sermon.acfSermonFields.speaker}
-										</p>
-									)}
-
+					{sermon ? (
+						<article>
+							<div className='grid grid-cols-12 gap-10 items-center'>
+								<div
+									className='col-span-12 md:col-span-6 lg:col-span-4'
+									key={sermon.id}
+								>
+									<h2 className='text-lg font-semibold'>
+										This Week's Sermon
+									</h2>
 									{sermon.date && (
-										<p className='text-sm text-gray-500'>
+										<p className='text-base mb-8'>
 											{formatDate(sermon.date)}
 										</p>
 									)}
-
-									{sermon.acfSermonFields?.youtube_id && (
+									<h3 className='text-xl font-bold'>
+										{sermon.title}
+									</h3>
+									{(sermon.acfSermonFields?.sermonSpeaker ??
+										sermon.acfSermonFields
+											?.sermon_speaker ??
+										sermon.acfSermonFields?.speaker) && (
+										<p className='text-sm mb-4'>
+											By{" "}
+											{sermon.acfSermonFields
+												?.sermonSpeaker ??
+												sermon.acfSermonFields
+													?.sermon_speaker ??
+												sermon.acfSermonFields?.speaker}
+										</p>
+									)}
+									{sermon.content && (
+										<div
+											className='mt-6 prose prose-sm max-w-none'
+											dangerouslySetInnerHTML={{
+												__html: sermon.content,
+											}}
+										/>
+									)}
+								</div>
+								<div className='col-span-12 md:col-span-6 lg:col-span-8'>
+									{(sermon.acfSermonFields?.youtube_id ??
+										sermon.acfSermonFields?.youtubeId) && (
 										<div className='mt-4'>
 											<div className='aspect-video w-full overflow-hidden rounded'>
 												<iframe
-													src={`https://www.youtube.com/embed/${sermon.acfSermonFields.youtube_id}?rel=0&showinfo=0`}
+													src={`https://www.youtube.com/embed/${
+														sermon.acfSermonFields
+															?.youtube_id ??
+														sermon.acfSermonFields
+															?.youtubeId
+													}?rel=0&showinfo=0`}
 													title={sermon.title}
 													allow='accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture'
 													className='w-full h-full border-0'
@@ -182,30 +206,135 @@ export default async function Home() {
 											</div>
 										</div>
 									)}
-
-									{sermon.content && (
-										<p className='mt-3 text-sm text-gray-700'>
-											{stripHtml(sermon.content).slice(
-												0,
-												200
-											)}
-											{stripHtml(sermon.content).length >
-											200
-												? "…"
-												: ""}
-										</p>
-									)}
 								</div>
-							</article>
-						) : (
-							<p>No sermons found.</p>
-						)}
-					</div>
+							</div>
+						</article>
+					) : (
+						<p>No sermons found.</p>
+					)}
 				</div>
 			</section>
-			<section className='events'>
-				Events is going to be brought in dynamically from events post
-				type in Wordpress.
+			<section className='events pt-[128px] pb-[104px]'>
+				<div className='container'>
+					<h2 className='text-[48px] font-bold text-center mb-12 text-blue'>
+						Coming Up Next
+					</h2>
+					{events && events.length > 0 ? (
+						<div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8'>
+							{events.map((event: any) => (
+								<article
+									key={event.id}
+									className='bg-white rounded overflow-hidden shadow hover:shadow-lg transition-shadow duration-300'
+								>
+									{event.featuredImage?.node?.sourceUrl && (
+										<Image
+											src={
+												event.featuredImage.node
+													.sourceUrl
+											}
+											alt={
+												event.featuredImage.node
+													.altText || event.title
+											}
+											width={400}
+											height={300}
+											className='w-full h-48 object-cover'
+										/>
+									)}
+									<div className='p-6'>
+										<h3 className='text-xl font-semibold mb-2'>
+											{event.title}
+										</h3>
+										{event.startDate && (
+											<p className='text-sm text-gray-600 mb-2'>
+												{formatDate(event.startDate)}
+												{event.allDay
+													? " (All Day)"
+													: ""}
+											</p>
+										)}
+										{event.venue?.title && (
+											<p className='text-sm text-gray-600 mb-3'>
+												📍 {event.venue.title}
+												{event.venue.city &&
+													`, ${event.venue.city}`}
+												{event.venue.state &&
+													`, ${event.venue.state}`}
+											</p>
+										)}
+										{event.content && (
+											<p className='text-sm text-gray-700 line-clamp-3'>
+												{stripHtml(event.content)}
+											</p>
+										)}
+
+										{/* Event action button - cycles through orange, magenta, green */}
+										{(() => {
+											const colors = [
+												"orange",
+												"magenta",
+												"lightGreen",
+											];
+											// map index by event id to keep deterministic order; fallback to 0
+											const idx =
+												Math.abs(
+													typeof event.id === "number"
+														? event.id
+														: String(event.id)
+																.split("")
+																.reduce(
+																	(
+																		s: number,
+																		c: string
+																	) =>
+																		s +
+																		c.charCodeAt(
+																			0
+																		),
+																	0
+																)
+												) % colors.length;
+											const color = colors[idx];
+											const href =
+												event.uri ||
+												`/events/${event.id}` ||
+												"/events";
+											return (
+												<div className='mt-4'>
+													<Link
+														href={href}
+														className={`inline-block text-white py-2 px-4 rounded transition-all duration-200 hover:opacity-95 bg-${color} hover:bg-${color}-dark`}
+													>
+														View Event
+													</Link>
+												</div>
+											);
+										})()}
+									</div>
+								</article>
+							))}
+						</div>
+					) : (
+						<div className='max-w-3xl mx-auto text-center bg-white rounded shadow p-8'>
+							<h3 className='text-xl font-semibold mb-2 text-gray-800'>
+								No upcoming events
+							</h3>
+							<p className='text-gray-600 mb-6'>
+								We don't have any events scheduled right now.
+								Check back soon or view our full calendar for
+								more details.
+							</p>
+							<div>
+								<Link
+									href={"/events"}
+									className='inline-block bg-yellowGreen text-white py-2 px-4 rounded hover:bg-yellowGreen-dark transition'
+								>
+									View Full Calendar
+								</Link>
+							</div>
+						</div>
+					)}
+				</div>
 			</section>
 			<hr className='max-w-[1072px] mx-auto border-[1px] border-solid border-grey' />
 			<section className='about-olivet pt-[128px] pb-[104px]'>
